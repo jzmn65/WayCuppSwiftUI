@@ -6,13 +6,32 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		524C74A82EDCF8A40097C7B5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74A72EDCF8A40097C7B5 /* FirebaseAuth */; };
+		524C74AA2EDCF8A40097C7B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74A92EDCF8A40097C7B5 /* FirebaseFirestore */; };
+		524C74AC2EDCF8A40097C7B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74AB2EDCF8A40097C7B5 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		524C74982EDCF7800097C7B5 /* WayCup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WayCup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		527EBF862EDD2812000FCDFE /* Exceptions for "WayCup" folder in "WayCup" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 524C74972EDCF7800097C7B5 /* WayCup */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		524C749A2EDCF7800097C7B5 /* WayCup */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				527EBF862EDD2812000FCDFE /* Exceptions for "WayCup" folder in "WayCup" target */,
+			);
 			path = WayCup;
 			sourceTree = "<group>";
 		};
@@ -23,6 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				524C74A82EDCF8A40097C7B5 /* FirebaseAuth in Frameworks */,
+				524C74AA2EDCF8A40097C7B5 /* FirebaseFirestore in Frameworks */,
+				524C74AC2EDCF8A40097C7B5 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +87,9 @@
 			);
 			name = WayCup;
 			packageProductDependencies = (
+				524C74A72EDCF8A40097C7B5 /* FirebaseAuth */,
+				524C74A92EDCF8A40097C7B5 /* FirebaseFirestore */,
+				524C74AB2EDCF8A40097C7B5 /* FirebaseStorage */,
 			);
 			productName = WayCup;
 			productReference = 524C74982EDCF7800097C7B5 /* WayCup.app */;
@@ -94,6 +119,9 @@
 			);
 			mainGroup = 524C748F2EDCF7800097C7B5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 524C74992EDCF7800097C7B5 /* Products */;
 			projectDirPath = "";
@@ -256,9 +284,9 @@
 				DEVELOPMENT_TEAM = TFDP4TV4DD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WayCup/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -288,9 +316,9 @@
 				DEVELOPMENT_TEAM = TFDP4TV4DD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WayCup/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -332,6 +360,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		524C74A72EDCF8A40097C7B5 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		524C74A92EDCF8A40097C7B5 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		524C74AB2EDCF8A40097C7B5 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 524C74902EDCF7800097C7B5 /* Project object */;
 }
