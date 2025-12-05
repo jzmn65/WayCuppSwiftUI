@@ -10,10 +10,13 @@
 		524C74A82EDCF8A40097C7B5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74A72EDCF8A40097C7B5 /* FirebaseAuth */; };
 		524C74AA2EDCF8A40097C7B5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74A92EDCF8A40097C7B5 /* FirebaseFirestore */; };
 		524C74AC2EDCF8A40097C7B5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 524C74AB2EDCF8A40097C7B5 /* FirebaseStorage */; };
+		5277DD662EE1CAED0063C584 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 5277DD652EE1CAED0063C584 /* .gitignore */; };
+		5277DD712EE1CCDF0063C584 /* GooglePlacesSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5277DD702EE1CCDF0063C584 /* GooglePlacesSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		524C74982EDCF7800097C7B5 /* WayCup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WayCup.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5277DD652EE1CAED0063C584 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +48,7 @@
 				524C74A82EDCF8A40097C7B5 /* FirebaseAuth in Frameworks */,
 				524C74AA2EDCF8A40097C7B5 /* FirebaseFirestore in Frameworks */,
 				524C74AC2EDCF8A40097C7B5 /* FirebaseStorage in Frameworks */,
+				5277DD712EE1CCDF0063C584 /* GooglePlacesSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,6 +58,7 @@
 		524C748F2EDCF7800097C7B5 = {
 			isa = PBXGroup;
 			children = (
+				5277DD652EE1CAED0063C584 /* .gitignore */,
 				524C749A2EDCF7800097C7B5 /* WayCup */,
 				524C74992EDCF7800097C7B5 /* Products */,
 			);
@@ -90,6 +95,7 @@
 				524C74A72EDCF8A40097C7B5 /* FirebaseAuth */,
 				524C74A92EDCF8A40097C7B5 /* FirebaseFirestore */,
 				524C74AB2EDCF8A40097C7B5 /* FirebaseStorage */,
+				5277DD702EE1CCDF0063C584 /* GooglePlacesSwift */,
 			);
 			productName = WayCup;
 			productReference = 524C74982EDCF7800097C7B5 /* WayCup.app */;
@@ -121,6 +127,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				5277DD6F2EE1CCDF0063C584 /* XCRemoteSwiftPackageReference "ios-places-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 524C74992EDCF7800097C7B5 /* Products */;
@@ -137,6 +144,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5277DD662EE1CAED0063C584 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +293,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WayCup/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app requires the use of device location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -317,6 +327,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WayCup/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app requires the use of device location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -370,6 +382,14 @@
 				minimumVersion = 12.6.0;
 			};
 		};
+		5277DD6F2EE1CCDF0063C584 /* XCRemoteSwiftPackageReference "ios-places-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googlemaps/ios-places-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -387,6 +407,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 524C74A62EDCF8A40097C7B5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		5277DD702EE1CCDF0063C584 /* GooglePlacesSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5277DD6F2EE1CCDF0063C584 /* XCRemoteSwiftPackageReference "ios-places-sdk" */;
+			productName = GooglePlacesSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -83,7 +83,7 @@ struct LoginView: View {
             }
         }
         .fullScreenCover(isPresented: $presentSheet) {
-            HomePageView(review: Review.preview)
+            HomePageView(locationManager: LocationManager(), review: Review(), placeVM: PlaceLookUpViewModel())
         }
     }
 

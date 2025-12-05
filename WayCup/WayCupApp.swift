@@ -24,7 +24,7 @@ struct WayCupApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
         WindowGroup {
-            HomePageView(review: Review.preview)
+            HomePageView(locationManager: LocationManager(), review: Review(), placeVM: PlaceLookUpViewModel())
         }
     }
 }
