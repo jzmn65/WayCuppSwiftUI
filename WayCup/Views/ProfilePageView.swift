@@ -15,11 +15,14 @@ struct ProfilePageView: View {
     init(profile: Profile, locationManager: LocationManager) {
         self._profile = State(initialValue: profile)
         self.locationManager = locationManager
+        self.photos = Photo(id: "defaultID", imageURLString: "")
     }
 
     @State var profile: Profile
+    @State var photos: Photo
     let locationManager: LocationManager
     @State var reviews: [Review] = []
+    @FirestoreQuery(collectionPath: "photo") var pics: [Photo]
     @State private var postCount = 0
     @State private var profilePicture: PhotosPickerItem?
     @State private var pickerIsPresented = false
@@ -30,6 +33,7 @@ struct ProfilePageView: View {
     @State private var selectedImage: Image?
     @State private var uiImage: UIImage?
     @State private var imageData = Data()
+    
     
     @Environment(\.dismiss) var dismiss
     
@@ -46,7 +50,7 @@ struct ProfilePageView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     HStack{
                         
-                        NavigationLink(destination: HomePageView(locationManager: LocationManager(), review: Review(),placeVM: PlaceLookUpViewModel())) {
+                        NavigationLink(destination: HomePageView(locationManager: LocationManager(), review: Review(),photos: photos, profile: Profile(), placeVM: PlaceLookUpViewModel())) {
                             Image("coffeeCup")
                                 .resizable()
                                 .scaledToFit()
@@ -105,7 +109,6 @@ struct ProfilePageView: View {
                                         // Auto upload
                                         await ProfilePhotoViewModel.uploadProfileImage(uiImage, for: userID)
                                         
-                                        dismiss()
                                         
                                     } catch {
                                         print("ERROR loading selected photo: \(error.localizedDescription)")
@@ -220,7 +223,7 @@ struct ProfilePageView: View {
                         HStack(spacing: 12) {
                             ForEach(userReviews) { review in
                                 if review.stars == 5 {
-                                    ReviewCardView(review: review)
+                                    ReviewCardView(review: review, photos: photos)
                                 }
                             }
                         }
@@ -237,7 +240,7 @@ struct ProfilePageView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(userReviews) { review in
-                                ReviewCardView(review: review)
+                                ReviewCardView(review: review, photos: photos)
                             }
                         }
                         .padding(.horizontal)
@@ -249,6 +252,9 @@ struct ProfilePageView: View {
             .navigationBarBackButtonHidden(true)
         }
         .navigationBarBackButtonHidden(true)
+        .task {
+            $pics.path = "photo/\(photos.id ?? "")/pics"
+        }
         .onAppear {
             loadCurrentUsername()
             loadReviews()
@@ -256,6 +262,11 @@ struct ProfilePageView: View {
                 if let uid = profile.id {
                     self.postCount = await fetchPostCount(for: uid)
                 }
+                await loadProfileImage()
+                await fetchName()
+                await fetchUserame()
+                await fetchProfilePhoto()
+                await fetchFavOrder()
             }
             
         }
@@ -263,131 +274,207 @@ struct ProfilePageView: View {
     
     // MARK: Firestore loading functions
     func loadCurrentUsername() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        Firestore.firestore().collection("users").document(uid).getDocument { doc, _ in
-            self.username = doc?.data()?["username"] as? String ?? ""
-        }
-    }
-    
-    func loadReviews() {
-        Firestore.firestore().collection("reviews").getDocuments { snapshot, _ in
-            Task { @MainActor in
-                let loaded = snapshot?.documents.compactMap { try? $0.data(as: Review.self) } ?? []
-                self.reviews = loaded
-            }
-        }
-    }
-    
-    func fetchPostCount(for userID: String) async -> Int {
-        let db = Firestore.firestore()
-        
-        do {
-            let snapshot = try await db.collection("reviews")
-                .whereField("userID", isEqualTo: userID)
-                .getDocuments()
-            
-            return snapshot.documents.count
-        } catch {
-            print("Error fetching posts: \(error)")
-            return 0
-        }
-    }
+          guard let uid = Auth.auth().currentUser?.uid else { return }
+          Firestore.firestore().collection("users").document(uid).getDocument { doc, _ in
+              self.username = doc?.data()?["username"] as? String ?? ""
+          }
+      }
+      
+      func fetchName() async {
+          guard let userID = Auth.auth().currentUser?.uid else { return }
 
-    
-    func updateNameInFirestore() async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+              do {
+                  let doc = try await Firestore.firestore()
+                      .collection("profiles")
+                      .document(userID)
+                      .getDocument()
 
-        do {
-            try await Firestore.firestore()
-                .collection("profiles")
-                .document(userId)
-                .setData(["name": name], merge: true)
+                  if let name = doc.get("name") as? String {
+                      await MainActor.run {
+                          self.profile.name = name
+                      }
+                  }
 
-            profile.name = name  // update local model
-        } catch {
-            print("Error updating name: \(error)")
-        }
-    }
+              } catch {
+                  print("Error fetching name:", error)
+              }
+      }
+      func fetchUserame() async {
+          guard let userID = Auth.auth().currentUser?.uid else { return }
 
+              do {
+                  let doc = try await Firestore.firestore()
+                      .collection("profiles")
+                      .document(userID)
+                      .getDocument()
 
+                  if let username = doc.get("username") as? String {
+                      await MainActor.run {
+                          self.profile.username = username
+                      }
+                  }
 
-    
-    func updateUsernameInFirestore() async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+              } catch {
+                  print("Error fetching name:", error)
+              }
+      }
+    func fetchFavOrder() async {
+        guard let userID = Auth.auth().currentUser?.uid else { return }
 
             do {
-                try await Firestore.firestore()
+                let doc = try await Firestore.firestore()
                     .collection("profiles")
-                    .document(userId)
-                    .setData(["username": username], merge: true)
+                    .document(userID)
+                    .getDocument()
 
-                profile.username = username  // update local model
+                if let currentFavOrder = doc.get("currentFavOrder") as? String {
+                    await MainActor.run {
+                        self.profile.currentFavOrder = currentFavOrder
+                    }
+                }
+
             } catch {
-                print("Error updating name: \(error)")
+                print("Error fetching currentFavOrder:", error)
             }
-        }
+    }
+      func fetchProfilePhoto() async {
+          guard let userID = Auth.auth().currentUser?.uid else { return }
 
-    func updateFavOrderInFirestore() async {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+              do {
+                  let doc = try await Firestore.firestore()
+                      .collection("profiles")
+                      .document(userID)
+                      .getDocument()
 
-            do {
-                try await Firestore.firestore()
-                    .collection("profiles")
-                    .document(userId)
-                    .setData(["favOrder": favOrder], merge: true)
+                  if let profilePicture = doc.get("profilePicture") as? String {
+                      await MainActor.run {
+                          self.profile.photoURL = profilePicture
+                      }
+                  }
 
-                profile.currentFavOrder = favOrder  // update local model
-            } catch {
-                print("Error updating name: \(error)")
-            }
-        }
-}
+              } catch {
+                  print("Error fetching name:", error)
+              }
+      }
+      
+      func loadReviews() {
+          Firestore.firestore().collection("reviews").getDocuments { snapshot, _ in
+              Task { @MainActor in
+                  let loaded = snapshot?.documents.compactMap { try? $0.data(as: Review.self) } ?? []
+                  self.reviews = loaded
+              }
+          }
+      }
+      
+      func fetchPostCount(for userID: String) async -> Int {
+          let db = Firestore.firestore()
+          
+          do {
+              let snapshot = try await db.collection("reviews")
+                  .whereField("userID", isEqualTo: userID)
+                  .getDocuments()
+              
+              return snapshot.documents.count
+          } catch {
+              print("Error fetching posts: \(error)")
+              return 0
+          }
+      }
+
+      
+      func updateNameInFirestore() async {
+          guard let userId = Auth.auth().currentUser?.uid else { return }
+
+          do {
+              try await Firestore.firestore()
+                  .collection("profiles")
+                  .document(userId)
+                  .setData(["name": name], merge: true)
+
+              profile.name = name  // update local model
+          } catch {
+              print("Error updating name: \(error)")
+          }
+      }
+
+
+
+      
+      func updateUsernameInFirestore() async {
+          guard let userId = Auth.auth().currentUser?.uid else { return }
+
+              do {
+                  try await Firestore.firestore()
+                      .collection("profiles")
+                      .document(userId)
+                      .setData(["username": username], merge: true)
+
+                  profile.username = username  // update local model
+              } catch {
+                  print("Error updating name: \(error)")
+              }
+          }
+
+      func updateFavOrderInFirestore() async {
+          guard let userId = Auth.auth().currentUser?.uid else { return }
+
+              do {
+                  try await Firestore.firestore()
+                      .collection("profiles")
+                      .document(userId)
+                      .setData(["favOrder": favOrder], merge: true)
+
+                  profile.currentFavOrder = favOrder  // update local model
+              } catch {
+                  print("Error updating name: \(error)")
+              }
+          }
+      
+      func loadProfileImage() async {
+          guard let urlString = profile.photoURL,
+                let url = URL(string: urlString) else { return }
+
+          do {
+              let (data, _) = try await URLSession.shared.data(from: url)
+              if let uiImage = UIImage(data: data) {
+                  await MainActor.run {
+                      self.selectedImage = Image(uiImage: uiImage)
+                  }
+              }
+          } catch {
+              print("Error loading profile image:", error)
+          }
+      }
+
+
+  }
 
 // MARK: Reusable Review Card
 struct ReviewCardView: View {
     let review: Review
+    @State var photos: Photo
+    @FirestoreQuery(collectionPath: "photo") var pics: [Photo]
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                if let urls = review.photoURLs, !urls.isEmpty {
-                    ForEach(urls, id: \.self) { urlString in
-                        if let url = URL(string: urlString) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 120, height: 120)
-                                        .clipped()
-                                        .cornerRadius(10)
-                                case .failure(_):
-                                    Image(systemName: "photo")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 120, height: 120)
-                                        .foregroundColor(.gray)
-                                case .empty:
-                                    ProgressView()
-                                        .frame(width: 120, height: 120)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
+                    ForEach(pics) { pic in
+                        let url = URL(string: pic.imageURLString)
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 210, height: 210)
+                        } placeholder: {
+                            ProgressView()
                         }
                     }
-                } else {
-                    // no photos — placeholder
-                    Image(systemName: "photo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 120, height: 120)
-                        .foregroundColor(.gray)
-                }
             }
         }
         .frame(height: 130) // ensure proper height
+        .task {
+            $pics.path = "photo/\(photos.id ?? "")/pics"
+        }
     }
 }
 
@@ -414,7 +501,6 @@ extension Review {
         stars: 5,
         latitude: 42.0,
         longitude: -71.0,
-        photoURLs: nil
     )
 }
 

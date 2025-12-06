@@ -13,12 +13,12 @@ import SwiftUI
 
 class PhotoViewModel {
 
-    static func saveImage(review: Review, data: Data) async {
+    static func saveImage(photo: Photo, data: Data) async {
         // Make sure the review has an id
-        var reviewID = review.id
+        var reviewID = photo.id
         if reviewID == nil {
             reviewID = UUID().uuidString
-            review.id = reviewID
+            photo.id = reviewID
         }
         
         guard let reviewID = reviewID else { return }
@@ -41,16 +41,12 @@ class PhotoViewModel {
             let url = try await storageref.downloadURL()
             
             // Append URL to review.photoURLs
-            if review.photoURLs != nil {
-                review.photoURLs?.append(url.absoluteString)
-            } else {
-                review.photoURLs = [url.absoluteString]
-            }
+            photo.imageURLString.append(url.absoluteString)
             
             // Update Firestore review document with new photoURLs
             let db = Firestore.firestore()
-            try await db.collection("review").document(reviewID).updateData([
-                "photoURLs": review.photoURLs ?? []
+            try await db.collection("photo").document(reviewID).updateData([
+                "imageURLString": photo.imageURLString
             ])
             
             print("Saved photo to Storage & updated Firestore: \(url.absoluteString)")

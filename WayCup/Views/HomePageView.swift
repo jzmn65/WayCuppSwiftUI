@@ -14,9 +14,11 @@ struct HomePageView: View {
     @Environment(\.dismiss) private var dismiss
     let locationManager: LocationManager
     var review: Review
+    @FirestoreQuery(collectionPath: "photo") var pics: [Photo]
+    @State var photos: Photo
     @State private var showPostList = false
     @State private var reviews: [Review] = []
-    @State private var currentProfile = Profile()
+    @State var profile: Profile
     @State private var profileLoaded = false
     @State var placeVM = PlaceLookUpViewModel()
     @State private var showSearchField = false
@@ -24,6 +26,7 @@ struct HomePageView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var searchRegion = MKCoordinateRegion()
     @State private var isLoggedIn = Auth.auth().currentUser != nil
+    
     private var mapCameraPosition: MapCameraPosition {
         let coordinate = CLLocationCoordinate2D(latitude: review.latitude, longitude: review.longitude)
         return .region(MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000))
@@ -40,7 +43,7 @@ struct HomePageView: View {
                     HStack{
                         NavigationLink {
                             if Auth.auth().currentUser != nil {
-                                ProfilePageView(profile: currentProfile, locationManager: locationManager) }
+                                ProfilePageView(profile: profile, locationManager: locationManager) }
                             else {
                                 LoginView()
                             }
@@ -131,8 +134,15 @@ struct HomePageView: View {
                     }
                 }
                 .navigationBarTitleDisplayMode(.inline)
-                Map(position: .constant(mapCameraPosition))
-                { Marker(review.place, coordinate: CLLocationCoordinate2D(latitude: review.latitude, longitude: review.longitude)) }
+                Map(position: .constant(mapCameraPosition)){
+                    Marker(review.place, coordinate: CLLocationCoordinate2D(latitude: review.latitude, longitude: review.longitude))
+                    
+                    UserAnnotation()
+                }
+                .mapControls {
+                    MapUserLocationButton()
+
+                }
                 
                 Button("See Posts", systemImage: "cup.and.saucer") {
                     showPostList = true
@@ -141,7 +151,7 @@ struct HomePageView: View {
                 .tint(.darkBrown)
                 .sheet(isPresented: $showPostList) {
                     NavigationStack {
-                        PostListView(reviews: reviews, profile: currentProfile)
+                        PostListView(photos: photos)
                             .toolbar {
                                 ToolbarItem(placement: .principal) {
                                     Button("", systemImage: "chevron.down") {
@@ -170,9 +180,9 @@ struct HomePageView: View {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         do {
             let doc = try await Firestore.firestore().collection("profiles").document(uid).getDocument()
-            if let p = try? doc.data(as: Profile.self) {
+            if let profile = try? doc.data(as: Profile.self) {
                 await MainActor.run {
-                    self.currentProfile = p
+                    self.profile = profile
                     self.profileLoaded = true
                 }
             }
@@ -196,7 +206,9 @@ struct HomePageView: View {
                 latitude: 37.7749,
                 longitude: -122.4194,
                 date: Date()
-            )
+            ),
+            photos: Photo(),
+            profile: Profile()
         )
     }
 }

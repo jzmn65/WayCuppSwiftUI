@@ -20,8 +20,6 @@ class Review: Identifiable, Codable {
     var stars: Int
     var latitude: Double
     var longitude: Double
-    var photoURLs: [String]? = nil      // Firebase URLs
-    var imagesData: [Data]? = nil       // Local in-memory images
     var date: Date
     var likeCount: Int
     
@@ -35,7 +33,6 @@ class Review: Identifiable, Codable {
             "stars": stars,
             "latitude": latitude,
             "longitude": longitude,
-            "photoURLs": photoURLs as Any,
             "date": date,
             "likeCount": likeCount
         ]
@@ -51,8 +48,6 @@ class Review: Identifiable, Codable {
         stars: Int = 0,
         latitude: Double = 0.0,
         longitude: Double = 0.0,
-        photoURLs: [String]? = nil,
-        imagesData: [Data]? = nil,
         date: Date = Date(),
         likeCount: Int = 0
     ) {
@@ -65,8 +60,6 @@ class Review: Identifiable, Codable {
         self.stars = stars
         self.latitude = latitude
         self.longitude = longitude
-        self.photoURLs = photoURLs
-        self.imagesData = imagesData
         self.date = date
         self.likeCount = likeCount
     }

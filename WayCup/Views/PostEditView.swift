@@ -13,16 +13,26 @@ import PhotosUI
 
 struct PostEditView: View {
     
-    // MARK: - Inputs
+    struct Annotation: Identifiable {
+        let id = UUID().uuidString
+        var name: String
+        var address: String
+        var coordinate: CLLocationCoordinate2D
+    }
     @State var review: Review
-    @State var currentProfile = Profile() // Pass this in if needed
-    
-    // MARK: - Map & Search
-    @State var placeVM = PlaceLookUpViewModel()
+    @State var currentProfile = Profile()
+    @FirestoreQuery(collectionPath: "photo") var pics: [Photo]
+    @State var photos: Photo
+    var placeVM = PlaceLookUpViewModel()
+    var postVM = PostViewModel()
+    var locationManager = LocationManager()
+        
+    @State private var annotations: [Annotation] = []
     @State private var showSearchField = false
     @State private var searchText = ""
     @State private var searchTask: Task<Void, Never>?
-    @State private var searchRegion = MKCoordinateRegion()
+    @State private var searchRegion: MKCoordinateRegion
+    
     private let mapDimension = 750.0
     
     private var mapCameraPosition: MapCameraPosition {
@@ -41,6 +51,13 @@ struct PostEditView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    init(review: Review) {
+        _review = State(initialValue: review)
+        _searchRegion = State(initialValue: MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: review.latitude, longitude: review.longitude), span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
+        self.photos = Photo(id: "defaultID", imageURLString: "")
+        
+    }
+    
     var body: some View {
         ZStack {
             Color.paper.ignoresSafeArea()
@@ -49,7 +66,7 @@ struct PostEditView: View {
                 
                 // Hidden NavigationLink for programmatic navigation
                 NavigationLink(
-                    destination: PostDisplayView(review: review, profile: currentProfile),
+                    destination: PostDisplayView(photos: photos, review: review, profile: currentProfile),
                     isActive: $navigateToPostDisplay
                 ) {
                     EmptyView()
@@ -77,7 +94,7 @@ struct PostEditView: View {
                     TextField("Search cafes…", text: $searchText)
                         .textFieldStyle(.roundedBorder)
                         .padding(.horizontal)
-                        .onChange(of: searchText) { _, newValue in
+                        .onChange(of: searchText) { oldValue, newValue in
                             searchTask?.cancel()
                             guard !newValue.isEmpty else {
                                 placeVM.places.removeAll()
@@ -95,7 +112,6 @@ struct PostEditView: View {
                                 }
                             }
                         }
-
                     
                     List(placeVM.places) { place in
                         Text(place.name)
@@ -104,6 +120,9 @@ struct PostEditView: View {
                                 review.place = place.name
                                 review.latitude = place.latitude
                                 review.longitude = place.longitude
+                                annotations = [Annotation(name: place.name, address: "", coordinate: CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude))]
+                                searchRegion.center = CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
+                                
                                 showSearchField = false
                                 searchText = ""
                                 placeVM.places.removeAll()
@@ -130,31 +149,28 @@ struct PostEditView: View {
                 StarSelectionView(rating: review.stars)
                 
                 // MARK: Photo Picker
-                Button("Choose Photos", systemImage: "camera.fill") {
+                Button {
                     photoSheetIsPresented = true
+                } label: {
+                    Label("Choose Photos", systemImage: "camera.fill")
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.darkBrown)
                 .padding(.horizontal)
                 .photosPicker(isPresented: $photoSheetIsPresented, selection: $selectedPhoto)
-                .onChange(of: selectedPhoto) { _, newValue in
+                .onChange(of: selectedPhoto) { oldValue, newValue in
                     Task {
-                        if let image = try? await newValue?.loadTransferable(type: Image.self) {
-                            selectedImage = image
-                        }
-                        if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                        if let data = try? await newValue?.loadTransferable(type: Data.self),
+                           let uiImage = UIImage(data: data) {
+                            selectedImage = Image(uiImage: uiImage)
                             photoData = data
                         }
                     }
                 }
                 
                 // MARK: Map
-                Map(position: .constant(mapCameraPosition)) {
-                    Marker(
-                        review.place.isEmpty ? "Location" : review.place,
-                        coordinate: CLLocationCoordinate2D(latitude: review.latitude, longitude: review.longitude)
-                    )
-                    UserAnnotation()
+                Map(coordinateRegion: $searchRegion, showsUserLocation: true, annotationItems: annotations) { annotation in
+                    MapMarker(coordinate: annotation.coordinate)
                 }
                 .mapControls {
                     MapUserLocationButton()
@@ -169,27 +185,16 @@ struct PostEditView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
-                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         Task {
-                            await savePost()
+                            await PostViewModel.savePost(review: review)
                             navigateToPostDisplay = true
                         }
                     }
                 }
             }
         }
-    }
-    
-    // MARK: Save Function
-    func savePost() async {
-        guard let id = await PostViewModel.savePost(review: review) else {
-            print("ERROR: Saving post")
-            return
-        }
-        review.id = id
-        print("Saved post with id: \(id)")
     }
 }
 
@@ -205,7 +210,6 @@ struct PostEditView: View {
                 stars: 0,
                 latitude: 37.7749,
                 longitude: -122.4194,
-                photoURLs: nil
             )
         )
     }

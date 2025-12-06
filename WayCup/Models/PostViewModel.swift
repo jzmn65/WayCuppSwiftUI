@@ -7,34 +7,32 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
 
 
-@Observable
+@MainActor
+
 class PostViewModel {
-    static func savePost(review: Review) async -> String? {
-        let db = Firestore.firestore()
-        
-        if let id = review.id {
-            do {
-                try db.collection("review").document(id).setData(from: review)
-                print("Data updated succesfully")
-                return id
-                
-            } catch {
-                print("Could not update data in 'review' \(error.localizedDescription)")
-                return id
-            }
-        } else {
-            do {
-                let docRef = try db.collection("review").addDocument(from: review)
-                print("Data added succesfully")
-                return docRef.documentID
-            } catch {
-                print("Could not add data in 'review' \(error.localizedDescription)")
-                return nil
-            }
+    static func savePost(review: Review) async {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("User not logged in")
+            return
+        }
+
+        let newReview = review
+        newReview.userID = currentUser.uid // map post to this user
+        newReview.date = Date()
+
+        do {
+            let _ = try Firestore.firestore()
+                .collection("reviews")
+                .addDocument(from: newReview)
+            print("Post saved for user \(currentUser.uid)")
+        } catch {
+            print("Error saving post: \(error)")
         }
     }
+
     static func deletePost(review: Review){
         let db = Firestore.firestore()
         guard let id = review.id else {
@@ -51,4 +49,5 @@ class PostViewModel {
         }
     }
 }
+
 

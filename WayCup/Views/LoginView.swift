@@ -22,6 +22,7 @@ struct LoginView: View {
     @State private var buttonDisabled = true
     @State private var presentSheet = false
     @FocusState private var focusField: Field?
+    
 
     var body: some View {
         ZStack{
@@ -83,7 +84,7 @@ struct LoginView: View {
             }
         }
         .fullScreenCover(isPresented: $presentSheet) {
-            HomePageView(locationManager: LocationManager(), review: Review(), placeVM: PlaceLookUpViewModel())
+            HomePageView(locationManager: LocationManager(), review: Review(), photos: Photo(), profile: Profile(), placeVM: PlaceLookUpViewModel())
         }
     }
 
